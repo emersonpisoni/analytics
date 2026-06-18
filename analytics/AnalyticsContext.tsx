@@ -1,21 +1,30 @@
 import React, { createContext, useContext, useMemo } from 'react';
 
+import { CompositeProvider } from './CompositeProvider';
 import { ConsoleProvider } from './ConsoleProvider';
+import { ContentsquareProvider } from './ContentsquareProvider';
 import { AnalyticsProvider } from './types';
 
 /**
  * Conecta o nosso SDK ao React.
  *
- * - Criamos UMA instância do provider e a disponibilizamos via Context.
  * - O hook useAnalytics() dá acesso a track/screen/identify em qualquer tela.
+ * - O app inteiro só conhece a interface AnalyticsProvider; aqui decidimos
+ *   QUAIS implementações concretas usar.
  *
- * Como o app inteiro só conhece a interface AnalyticsProvider, pra plugar um
- * SDK real depois basta trocar `new ConsoleProvider()` pela implementação real.
+ * Hoje usamos um CompositeProvider que manda os eventos para DOIS destinos:
+ *   1. Contentsquare (real) — só envia de fato num dev build nativo.
+ *   2. eventLog (ConsoleProvider) — alimenta a aba Console pra você ver ao vivo.
  */
 
-// Expomos a instância concreta para a tela de console poder ler/observar os
-// eventos (getEvents/subscribe). As telas normais usam só o hook.
-export const analytics = new ConsoleProvider();
+// O ConsoleProvider fica exposto para a tela de Console observar os eventos.
+export const eventLog = new ConsoleProvider();
+
+// O provider que as telas realmente usam: faz fan-out Contentsquare + Console.
+export const analytics: AnalyticsProvider = new CompositeProvider([
+  new ContentsquareProvider(),
+  eventLog,
+]);
 
 const AnalyticsContext = createContext<AnalyticsProvider>(analytics);
 

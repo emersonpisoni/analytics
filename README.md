@@ -71,7 +71,69 @@ Esse é, inclusive, o conceito por trás do **Segment**.
 - **Explícito / manual:** você chama `track()` no código. Ex: Google Analytics (GA4 /
   Firebase), Amplitude, Mixpanel. É o que fazemos aqui.
 - **Autocapture:** o SDK captura *tudo* automaticamente e você define os eventos depois.
-  Ex: **Heap**, PostHog. (Vamos simular isso num passo futuro.)
+  Ex: **Heap**, PostHog.
+
+---
+
+## Integração real com o Contentsquare (antigo Heap)
+
+> O SDK clássico do Heap (`@heap/react-native-heap`) foi descontinuado. O caminho
+> oficial agora é o **CSQ SDK** (`@contentsquare/react-native-bridge`). Este projeto já
+> usa a versão nova.
+
+Além do provider mock, o app está ligado ao **Contentsquare** de verdade, para mostrar
+como um SDK real entra na arquitetura. A sacada: o app **não mudou nada** — só trocamos a
+implementação da mesma interface.
+
+### Como está montado
+```
+analytics/
+  ContentsquareProvider.ts # traduz nossa interface -> API do CSQ
+  CompositeProvider.ts     # manda cada evento pro CSQ E pro Console (fan-out, estilo Segment)
+  csqConfig.ts             # 👈 onde você cola o Environment ID
+```
+Em [`AnalyticsContext.tsx`](analytics/AnalyticsContext.tsx) o app usa um
+`CompositeProvider([new ContentsquareProvider(), eventLog])`: os eventos vão pro
+Contentsquare **e** continuam aparecendo na aba Console pra você conferir localmente.
+
+Mapeamento da nossa interface para o CSQ:
+
+| Nossa interface | Contentsquare (`@contentsquare/react-native-bridge`) |
+|---|---|
+| (inicialização) | `CSQ.start(StartConfig.withEnvironmentId(id, { enableRNAutocapture: true }))` |
+| (consentimento) | `CSQ.optIn()` — **obrigatório**: o CSQ é opt-out por padrão |
+| `track(name, props)` | `CSQ.trackEvent(name, props)` |
+| `screen(name)` | `CSQ.trackScreenview(name)` |
+| `identify(userId, traits)` | `CSQ.identify(userId)` + `CSQ.addUserProperties(traits)` |
+
+> ⚠️ **Opt-out por padrão:** diferente do Heap clássico, o CSQ **não rastreia nada** até
+> você chamar `CSQ.optIn()`. Nosso provider já faz isso no construtor — e é exatamente o
+> gancho do **Passo 5 (consentimento / LGPD)**.
+
+### Configuração (faça isto para enviar dados de verdade)
+
+1. **Cole o Environment ID** em [`analytics/csqConfig.ts`](analytics/csqConfig.ts)
+   (painel do Contentsquare → Settings → Environments).
+
+2. **⚠️ Não funciona no Expo Go.** É um módulo nativo. No Expo Go o app roda normal e o
+   Console funciona, mas o CSQ fica desligado (nada é enviado). Para enviar de verdade
+   você precisa de um **dev build**.
+
+3. **Gerar o dev build e instalar no Android físico:**
+   ```bash
+   # com o celular conectado via USB (depuração USB ativada):
+   npx expo run:android
+   ```
+   Isso compila o app nativo e instala no aparelho. (Requer Android Studio / SDK.)
+   Alternativa sem ambiente nativo local: `eas build --profile development --platform android`
+   e instalar o APK gerado.
+
+4. Abra o app no aparelho, toque nos botões da aba **Demo** e confira os eventos
+   chegando no **painel do Contentsquare** (pode levar alguns minutos para aparecer).
+
+> O autocapture já vem ligado (`enableRNAutocapture: true` + plugin do babel em
+> [`babel.config.js`](babel.config.js)): além dos eventos manuais, o CSQ captura
+> toques/telas automaticamente — dá pra comparar os dois modelos no painel.
 
 ---
 
@@ -80,9 +142,12 @@ Esse é, inclusive, o conceito por trás do **Segment**.
 ```
 analytics/
   types.ts             # Contrato: Properties, AnalyticsEvent, AnalyticsProvider
-  ConsoleProvider.ts   # Provider MOCK: guarda em memória, loga e notifica a UI
+  ConsoleProvider.ts       # Provider MOCK: guarda em memória, loga e notifica a UI
+  ContentsquareProvider.ts # Provider REAL: traduz nossa interface -> API do CSQ
+  CompositeProvider.ts     # Fan-out: manda cada evento pra vários providers
+  csqConfig.ts             # Environment ID do Contentsquare
   events.ts            # Catálogo de eventos (taxonomy)
-  AnalyticsContext.tsx # Context + hook useAnalytics()
+  AnalyticsContext.tsx # Context + hook useAnalytics() + wiring dos providers
 app/(tabs)/
   index.tsx            # Tela Demo: botões que disparam eventos
   console.tsx          # Tela Console: lista os eventos ao vivo
@@ -99,7 +164,10 @@ app/(tabs)/
 - [ ] **Passo 3 — Sessão e user properties** (timeout de sessão, traits do usuário).
 - [ ] **Passo 4 — Pipeline mobile:** fila, **batching**, *flush* e **buffer offline**.
 - [ ] **Passo 5 — Consentimento / LGPD:** toggle de opt-out que bloqueia o tracking.
-- [ ] **Passo 6 — Autocapture** (estilo Heap): capturar toques automaticamente.
+- [x] **Contentsquare real** — `ContentsquareProvider` (CSQ SDK) ligado via fan-out,
+      com autocapture habilitado.
+- [ ] **Passo 6 — Comparar manual vs autocapture**: analisar no painel do Contentsquare
+      a diferença entre os eventos que mandamos com `trackEvent` e os capturados sozinhos.
 
 ---
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { analytics } from '@/analytics/AnalyticsContext';
+import { eventLog } from '@/analytics/AnalyticsContext';
 import { AnalyticsEvent } from '@/analytics/types';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -14,18 +14,18 @@ import { ThemedView } from '@/components/themed-view';
  * acompanhar, ao vivo, o que cada ação dispara.
  */
 export default function ConsoleScreen() {
-  const [events, setEvents] = useState<AnalyticsEvent[]>(analytics.getEvents());
+  const [events, setEvents] = useState<AnalyticsEvent[]>(eventLog.getEvents());
 
   useEffect(() => {
     // Inscreve-se nas atualizações do provider e cancela ao desmontar.
-    return analytics.subscribe(setEvents);
+    return eventLog.subscribe(setEvents);
   }, []);
 
   return (
     <ThemedView style={styles.container}>
       <View style={styles.header}>
         <ThemedText type="title">Console</ThemedText>
-        <Pressable onPress={() => analytics.clear()} style={styles.clearBtn}>
+        <Pressable onPress={() => eventLog.clear()} style={styles.clearBtn}>
           <ThemedText style={styles.clearText}>Limpar</ThemedText>
         </Pressable>
       </View>

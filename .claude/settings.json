@@ -1,10 +1,27 @@
 {
-  "enabledPlugins": {
-    "expo@claude-plugins-official": true
-  },
   "permissions": {
     "allow": [
-      "Bash(git mv *)"
+      "Bash(git mv *)",
+      "WebSearch",
+      "WebFetch(domain:docs.contentsquare.com)",
+      "WebFetch(domain:developers.heap.io)",
+      "Bash(npx expo *)",
+      "Bash(node -e \"console.log\\(require\\('@heap/react-native-heap/package.json'\\).version\\)\")",
+      "Bash(node -e \"const h=require\\('@heap/react-native-heap'\\); console.log\\('default keys:', Object.keys\\(h.default||{}\\)\\); console.log\\('named:', Object.keys\\(h\\).filter\\(k=>k!=='default'\\)\\)\")",
+      "Bash(npm rm *)",
+      "Bash(node -e \"console.log\\(require\\('@contentsquare/react-native-bridge/package.json'\\).version\\)\")",
+      "Bash(node -e \"const d=require\\('./package.json'\\).dependencies; console.log\\(Object.keys\\(d\\).filter\\(k=>k.includes\\('heap'\\)||k.includes\\('contentsquare'\\)\\)\\)\")",
+      "Bash(node -e \"console.log\\(JSON.stringify\\(require\\('./app.json'\\).expo.plugins\\)\\)\")",
+      "Bash(node -e \"const p=require\\('@contentsquare/react-native-bridge/package.json'\\); console.log\\('main:',p.main,'types:',p.types||p.typings\\)\")",
+      "Bash(git check-ignore *)",
+      "Bash(adb devices *)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"console.log\\('versão:', require\\('babel-preset-expo/package.json'\\).version\\)\")",
+      "Bash(node -e \"console.log\\('babel-preset-expo:', require\\('babel-preset-expo/package.json'\\).version\\)\")",
+      "Bash(node -e \"require.resolve\\('@contentsquare/react-native-bridge/babel'\\); console.log\\('plugin CSQ babel: OK'\\)\")"
     ]
+  },
+  "enabledPlugins": {
+    "expo@claude-plugins-official": true
   }
 }
