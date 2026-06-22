@@ -135,22 +135,73 @@ Mapeamento da nossa interface para o CSQ:
 > [`babel.config.js`](babel.config.js)): além dos eventos manuais, o CSQ captura
 > toques/telas automaticamente — dá pra comparar os dois modelos no painel.
 
+### Como validar a implementação (4 camadas)
+
+Validar analytics é um problema real: o dado some entre o toque e o dashboard. Vale
+checar camada por camada, da mais rápida para a definitiva:
+
+| # | Onde | Confirma que... | Latência |
+|---|---|---|---|
+| 1 | **Aba Console** (no app) | o app **disparou** o evento | imediato |
+| 2 | **logcat** (`adb logcat`) | o SDK **enviou** pra rede | imediato |
+| 3 | **Live / Log Visualizer** (painel) | o evento **chegou** no Contentsquare | segundos/min |
+| 4 | **Events / Explore** (painel) | virou **análise** | ~30 min* |
+
+\* Os dados só viram análise depois de **sessionizados**, o que acontece **~30 min após o
+último evento** (a sessão precisa "fechar"). Por isso a tela de análise fica vazia logo
+após o teste — é esperado, não é erro.
+
+Para a camada 2, o sinal de sucesso no logcat é:
+```
+I CSLIB : All pending data has been uploaded.
+```
+
+### Pegadinhas reais que encontramos (gotchas)
+
+Coisas que a documentação não deixa óbvias e custaram tempo nesta integração:
+
+1. **Heap virou Contentsquare.** O pacote `@heap/react-native-heap` foi descontinuado;
+   o novo é `@contentsquare/react-native-bridge`, com API diferente (`track` →
+   `trackEvent`) e **opt-out por padrão** (precisa de `CSQ.optIn()`).
+
+2. **Não roda no Expo Go.** Módulo nativo ⇒ precisa de **dev build** (`expo run:android`).
+   No Expo Go o app funciona, mas o CSQ fica mudo.
+
+3. **`babel.config.js` próprio exige instalar `babel-preset-expo`.** Sem ele, o bundle
+   quebra com `Cannot find module 'babel-preset-expo'` — o Expo só usa o preset
+   "invisível" quando você **não** tem um `babel.config.js`.
+
+4. **Trocar de SDK exige `expo prebuild --clean`.** A pasta `android/` é gerada e fica
+   desatualizada; sem regenerar, o módulo nativo novo não entra no build.
+
+5. **O 404 de `config/v2/<package>.json` é normal e NÃO bloqueia o Product Analytics.**
+   Esse endpoint é a config "core" (Experience Analytics / session replay), buscada pela
+   **package name** do app. O Product Analytics (os `trackEvent`/`identify` — a parte
+   "Heap") sobe pelo **Environment ID**, por outro caminho. Os eventos foram enviados com
+   sucesso mesmo com o 404 no log.
+
+6. **Dois identificadores diferentes, não confunda:**
+   - **Environment ID** (ex: `1757607503`) — do Contentsquare, em *Account → Manage →
+     Projects → [projeto] → Environments*. É o que vai no `csqConfig.ts`.
+   - **Package name** (ex: `com.emersonpisoni.analytics`) — do **seu** app, em
+     [`app.json`](app.json) → `expo.android.package`. Gerada pelo prebuild.
+
 ---
 
 ## Estrutura do código
 
 ```
 analytics/
-  types.ts             # Contrato: Properties, AnalyticsEvent, AnalyticsProvider
+  types.ts                 # Contrato: Properties, AnalyticsEvent, AnalyticsProvider
   ConsoleProvider.ts       # Provider MOCK: guarda em memória, loga e notifica a UI
   ContentsquareProvider.ts # Provider REAL: traduz nossa interface -> API do CSQ
   CompositeProvider.ts     # Fan-out: manda cada evento pra vários providers
   csqConfig.ts             # Environment ID do Contentsquare
-  events.ts            # Catálogo de eventos (taxonomy)
-  AnalyticsContext.tsx # Context + hook useAnalytics() + wiring dos providers
+  events.ts                # Catálogo de eventos (taxonomy)
+  AnalyticsContext.tsx     # Context + hook useAnalytics() + wiring dos providers
 app/(tabs)/
-  index.tsx            # Tela Demo: botões que disparam eventos
-  console.tsx          # Tela Console: lista os eventos ao vivo
+  index.tsx                # Tela Demo: botões que disparam eventos
+  console.tsx              # Tela Console: lista os eventos ao vivo
 ```
 
 ---
