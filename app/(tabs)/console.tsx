@@ -6,18 +6,10 @@ import { AnalyticsEvent } from '@/analytics/types';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 
-/**
- * Tela de Console: visualiza os eventos que o nosso provider capturou.
- *
- * Num app real esses eventos iriam pra um servidor e você os veria num
- * dashboard (Amplitude, GA4...). Aqui mostramos na própria tela pra você
- * acompanhar, ao vivo, o que cada ação dispara.
- */
 export default function ConsoleScreen() {
   const [events, setEvents] = useState<AnalyticsEvent[]>(eventLog.getEvents());
 
   useEffect(() => {
-    // Inscreve-se nas atualizações do provider e cancela ao desmontar.
     return eventLog.subscribe(setEvents);
   }, []);
 
@@ -57,7 +49,6 @@ const TYPE_COLOR: Record<AnalyticsEvent['type'], string> = {
 
 function EventRow({ event }: { event: AnalyticsEvent }) {
   const time = new Date(event.timestamp).toLocaleTimeString();
-  // Só mostramos propriedades com valor (evita poluir com undefined/null).
   const props = Object.entries(event.properties ?? {}).filter(
     ([, v]) => v !== undefined && v !== null,
   );

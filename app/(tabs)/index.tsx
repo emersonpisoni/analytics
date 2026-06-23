@@ -5,12 +5,7 @@ import { Events } from '@/analytics/events';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 
-/**
- * Tela Demo: cada botão dispara um evento. Toque e depois veja o resultado
- * na aba Console. A ideia é conectar "ação no app" -> "evento de analytics".
- */
 export default function DemoScreen() {
-  // Pegamos o SDK via hook — o mesmo padrão de um app real.
   const analytics = useAnalytics();
 
   return (
@@ -21,7 +16,6 @@ export default function DemoScreen() {
           Toque nos botões e acompanhe os eventos na aba Console.
         </ThemedText>
 
-        {/* 1. track simples */}
         <Section
           title="1. Evento simples (track)"
           description="A unidade básica: algo aconteceu. Aqui, um clique sem contexto extra.">
@@ -31,7 +25,6 @@ export default function DemoScreen() {
           />
         </Section>
 
-        {/* 2. track com propriedades */}
         <Section
           title="2. Evento com propriedades"
           description="As propriedades dão contexto: qual produto, qual preço. É o que torna o dado útil.">
@@ -57,7 +50,6 @@ export default function DemoScreen() {
           />
         </Section>
 
-        {/* 3. identify */}
         <Section
           title="3. Identidade (identify)"
           description="Antes do login o usuário é anônimo. Após o login, associamos os eventos a ele.">
@@ -69,7 +61,6 @@ export default function DemoScreen() {
           />
         </Section>
 
-        {/* 4. funil */}
         <Section
           title="4. Funil de conversão"
           description="Uma sequência de eventos que mede onde o usuário avança ou desiste.">
