@@ -135,8 +135,15 @@ Abra no Expo Go / simulador. Toque nos botões da aba **Demo** e veja os eventos
 > roda e a Console funciona, mas nenhum evento é enviado. Para enviar de verdade é preciso
 > um **dev build**.
 
-1. **Cole o Environment ID** em [`analytics/csqConfig.ts`](analytics/csqConfig.ts)
-   (painel: *Account → Manage → Projects → [projeto] → Environments*).
+1. **Configure o Environment ID** num arquivo `.env` (copie de
+   [`.env.example`](.env.example)):
+   ```bash
+   cp .env.example .env
+   # edite e preencha EXPO_PUBLIC_CSQ_ENVIRONMENT_ID=<seu id>
+   ```
+   O ID fica no painel em *Account → Manage → Projects → [projeto] → Environments*.
+   O `.env` é **gitignored**; o prefixo `EXPO_PUBLIC_` é obrigatório para o app ler em
+   runtime. (Esse ID é client-side e acaba no bundle — é identificador, não segredo.)
 
 2. **Gere o dev build e instale no Android físico** (USB com depuração ativada):
    ```bash
@@ -186,8 +193,8 @@ Coisas que a documentação não deixa óbvias e custaram tempo:
    é a config de Experience Analytics (session replay), buscada por **package name**. Os
    `trackEvent`/`identify` sobem pelo **Environment ID**, por outro caminho.
 6. **Dois identificadores, não confunda:**
-   **Environment ID** (do Contentsquare, vai no `csqConfig.ts`) vs **package name** (do seu
-   app, em [`app.json`](app.json) → `expo.android.package`, gerada pelo prebuild).
+   **Environment ID** (do Contentsquare, vai no `.env`) vs **package name** (do seu app,
+   em [`app.json`](app.json) → `expo.android.package`, gerada pelo prebuild).
 
 ---
 
