@@ -18,18 +18,18 @@ export default function ConsoleScreen() {
       <View style={styles.header}>
         <ThemedText type="title">Console</ThemedText>
         <Pressable onPress={() => eventLog.clear()} style={styles.clearBtn}>
-          <ThemedText style={styles.clearText}>Limpar</ThemedText>
+          <ThemedText style={styles.clearText}>Clear</ThemedText>
         </Pressable>
       </View>
 
       <ThemedText style={styles.subtitle}>
-        {events.length} evento(s) capturado(s) — mais recente no topo
+        {events.length} event(s) captured — newest first
       </ThemedText>
 
       <ScrollView contentContainerStyle={styles.list}>
         {events.length === 0 && (
           <ThemedText style={styles.empty}>
-            Nenhum evento ainda. Vá na aba Demo e toque nos botões.
+            No events yet. Go to the Demo tab and tap the buttons.
           </ThemedText>
         )}
 

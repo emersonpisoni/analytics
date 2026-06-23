@@ -13,34 +13,34 @@ export default function DemoScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <ThemedText type="title">Analytics 101</ThemedText>
         <ThemedText style={styles.intro}>
-          Toque nos botões e acompanhe os eventos na aba Console.
+          Tap the buttons and watch the events in the Console tab.
         </ThemedText>
 
         <Section
-          title="1. Evento simples (track)"
-          description="A unidade básica: algo aconteceu. Aqui, um clique sem contexto extra.">
+          title="1. Simple event (track)"
+          description="The basic unit: something happened. Here, a click with no extra context.">
           <Button
-            label="Disparar Button Clicked"
+            label="Fire Button Clicked"
             onPress={() => analytics.track(Events.ButtonClicked)}
           />
         </Section>
 
         <Section
-          title="2. Evento com propriedades"
-          description="As propriedades dão contexto: qual produto, qual preço. É o que torna o dado útil.">
+          title="2. Event with properties"
+          description="Properties add context: which product, which price. That's what makes the data useful.">
           <Button
-            label="Ver produto (camiseta R$ 79)"
+            label="View product (T-shirt, R$79)"
             onPress={() =>
               analytics.track(Events.ProductViewed, {
                 product_id: 'SKU-123',
-                name: 'Camiseta',
+                name: 'T-shirt',
                 price: 79.0,
                 currency: 'BRL',
               })
             }
           />
           <Button
-            label="Adicionar ao carrinho"
+            label="Add to cart"
             onPress={() =>
               analytics.track(Events.ProductAddedToCart, {
                 product_id: 'SKU-123',
@@ -51,10 +51,10 @@ export default function DemoScreen() {
         </Section>
 
         <Section
-          title="3. Identidade (identify)"
-          description="Antes do login o usuário é anônimo. Após o login, associamos os eventos a ele.">
+          title="3. Identity (identify)"
+          description="Before login the user is anonymous. After login, we associate events with them.">
           <Button
-            label="Fazer login (identify)"
+            label="Log in (identify)"
             onPress={() =>
               analytics.identify('user-42', { plan: 'free', language: 'pt-BR' })
             }
@@ -62,14 +62,14 @@ export default function DemoScreen() {
         </Section>
 
         <Section
-          title="4. Funil de conversão"
-          description="Uma sequência de eventos que mede onde o usuário avança ou desiste.">
+          title="4. Conversion funnel"
+          description="A sequence of events that measures where the user advances or drops off.">
           <Button
-            label="Iniciar checkout"
+            label="Start checkout"
             onPress={() => analytics.track(Events.CheckoutStarted, { items: 1, total: 79.0 })}
           />
           <Button
-            label="Finalizar compra"
+            label="Complete order"
             onPress={() =>
               analytics.track(Events.OrderCompleted, { order_id: 'ORD-001', total: 79.0 })
             }
